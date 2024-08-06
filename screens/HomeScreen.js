@@ -1,4 +1,3 @@
-// screens/HomeScreen.js
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import axios from "axios";
