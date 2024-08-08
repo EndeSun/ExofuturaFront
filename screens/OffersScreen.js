@@ -1,12 +1,50 @@
-import React from "react";
-import { StyleSheet, View, Text } from "react-native";
-import MapView from "react-native-maps";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import axios from "axios";
 
 export default function OffersScreen() {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "https://cima.aemps.es/cima/rest/medicamento?nregistro=51347"
+        );
+        setData(response.data);
+        setLoading(false);
+      } catch (error) {
+        setError("Error al obtener los datos");
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.container}>
+        <Text>{error}</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Text>Hola</Text>
-      <MapView style={styles.map} />
+      <Text>Nombre del Medicamento: {data.nombre}</Text>
+      <Text>Principio Activo: {data.pactivos}</Text>
+      {/* Agrega más campos según la estructura de los datos que recibes */}
     </View>
   );
 }
@@ -14,9 +52,8 @@ export default function OffersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  map: {
-    width: '100%',
-    height: '100%',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
