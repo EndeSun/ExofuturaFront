@@ -11,7 +11,6 @@ export default function HomeScreen() {
     const fetchData = async () => {
       try {
         const response = await axios.get("https://cima.aemps.es/cima/rest/medicamento?nregistro=51347");
-        console.log(response);
         setData(response.data);
         setLoading(false);
       } catch (error) {
