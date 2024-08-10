@@ -11,7 +11,7 @@ export default function OffersScreen() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "https://cima.aemps.es/cima/rest/medicamento?nregistro=51347"
+          "http://172.20.10.12/exofutura/public/api/v1/zones"
         );
         setData(response.data);
         setLoading(false);
@@ -42,9 +42,11 @@ export default function OffersScreen() {
 
   return (
     <View style={styles.container}>
-      <Text>Nombre del Medicamento: {data.nombre}</Text>
-      <Text>Principio Activo: {data.pactivos}</Text>
-      {/* Agrega más campos según la estructura de los datos que recibes */}
+      {loading && <Text>Cargando...</Text>}
+      {error && <Text>{error}</Text>}
+      {!loading && !error && data && (
+        <Text>Datos de la zona: {JSON.stringify(data)}</Text>
+      )}
     </View>
   );
 }
