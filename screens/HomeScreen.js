@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import { StyleSheet, View, Text, Platform } from "react-native";
 import MapView, { Marker } from "react-native-maps";
+import * as Location from "expo-location";
 import axios from "axios";
 
 export default function HomeScreen() {
+  // MARK: STATES
+  // ZONE STATE
   const [zoneData, setZoneData] = useState(null);
   const [zoneLoading, setZoneLoading] = useState(true);
   const [zoneError, setZoneError] = useState(null);
+
+  // LOCATION STATE
+  const [location, setLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
 
   // MARK: FETCH ZONE DATA
   useEffect(() => {
@@ -23,6 +30,24 @@ export default function HomeScreen() {
       }
     };
 
+    const fetchLocation = async () => {
+      if (Platform.OS === "android" && !Device.isDevice) {
+        setLocationError(
+          "Oops, this will not work on Snack in an Android Emulator. Try it on your device!"
+        );
+        return;
+      }
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        setLocationError("Permission to access location was denied");
+        return;
+      }
+
+      let location = await Location.getCurrentPositionAsync({});
+      setLocation(location);
+    };
+
+    fetchLocation();
     fetchData();
   }, []);
 
@@ -32,31 +57,39 @@ export default function HomeScreen() {
 
     return zoneData.map((zone, index) => (
       <Marker
-        key={index} 
+        key={index}
         coordinate={{
-          latitude: zone.latitude, 
-          longitude: zone.longitude, 
+          latitude: zone.latitude,
+          longitude: zone.longitude,
         }}
-        title={zone.name} 
-        description={zone.description} 
+        title={zone.name}
+        description={zone.description}
       />
     ));
   };
   //#endregion CREATE MARKERS
 
   // #region LOADING AND ERROR HANDLING
+  let text = "Waiting...";
+
   if (zoneLoading) {
     return (
       <View style={styles.container}>
-        <Text>Cargando los datos...</Text>
+        <Text>{text}</Text>
       </View>
     );
   }
 
-  if (zoneError) {
+  if (locationError) {
+    text = locationError;
+  } else if (location) {
+    text = JSON.stringify(location);
+  }
+
+  if (locationError) {
     return (
       <View style={styles.container}>
-        <Text>{zoneError}</Text>
+        <Text>{locationError}</Text>
       </View>
     );
   }
@@ -66,23 +99,27 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.container}>
-        <MapView
-          initialRegion={{
-            latitude: 41.6477295, // Adjust initial region as needed
-            longitude: -0.8770484,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          style={styles.map}
-        >
-          {createMarkers()}
-        </MapView>
+        {location ? (
+          <MapView
+            initialRegion={{
+              latitude: location.coords.latitude,
+              longitude: location.coords.longitude,
+              latitudeDelta: 0.0922,
+              longitudeDelta: 0.0421,
+            }}
+            style={styles.map}
+            showsUserLocation={true}
+          >
+            {createMarkers()}
+          </MapView>
+        ) : (
+          <Text>Cargando mapa...</Text>
+        )}
       </View>
     </View>
   );
   // #endregion
 }
-
 
 // #region STYLES
 const styles = StyleSheet.create({
