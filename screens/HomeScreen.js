@@ -4,6 +4,62 @@ import { fetchZones } from "./services/zones";
 import { fetchLocation } from "./services/location";
 import MapComponent from "./components/MapComponent";
 import styles from "./style/styles";
+import { GeofencingEventType } from "expo-location";
+import * as Location from "expo-location";
+import * as TaskManager from "expo-task-manager";
+
+const GEOFENCING_TASK = "GEOFENCING_TASK";
+
+TaskManager.defineTask(
+  GEOFENCING_TASK,
+  ({ data: { eventType, region }, error }) => {
+    if (error) {
+      console.error(error.message);
+      return;
+    }
+    if (eventType === GeofencingEventType.Enter) {
+      console.log("You've entered region:", region);
+    } else if (eventType === GeofencingEventType.Exit) {
+      console.log("You've left region:", region);
+    }
+  }
+);
+
+const regions = [
+  {
+    identifier: "Region1",
+    latitude: 41.65,
+    longitude: -0.90,
+    radius: 100,
+  },
+  {
+    identifier: "Region2",
+    latitude: 38.35,
+    longitude: -0.49,
+    radius: 100,
+  },
+];
+
+const startGeofencing = async () => {
+  const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+  if (foregroundStatus !== "granted") {
+    console.error("Permission to access location was denied");
+    return;
+  }
+
+  const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+  if (backgroundStatus !== "granted") {
+    console.error("Permission to access location in the background was denied");
+    return;
+  }
+
+  try {
+    await Location.startGeofencingAsync(GEOFENCING_TASK, regions);
+    console.log("Geofencing started");
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const ErrorMessage = ({ message }) => (
   <View style={styles.container}>
@@ -34,6 +90,8 @@ export default function HomeScreen() {
     };
 
     fetchData();
+
+    startGeofencing();
   }, []);
   // #endregion FETCHING
 
