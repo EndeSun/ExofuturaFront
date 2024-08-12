@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
-import MapView, { Marker } from "react-native-maps";
-import axios from "axios";
+import { View, Text } from "react-native";
+import { Marker } from "react-native-maps";
+import { fetchZones } from "./services/zones";
+import { fetchLocation } from "./services/location";
+import MapComponent from "./components/MapComponent";
+import styles from './style/styles';
 
 export default function HomeScreen() {
+  // #region STATES
+  // ZONE STATE
   const [zoneData, setZoneData] = useState(null);
   const [zoneLoading, setZoneLoading] = useState(true);
   const [zoneError, setZoneError] = useState(null);
 
-  // MARK: FETCH ZONE DATA
+  // LOCATION STATE
+  const [location, setLocation] = useState(null);
+  const [locationError, setLocationError] = useState(null);
+  // #endregion STATES
+
+  // #region FETCHING
   useEffect(() => {
-    const fetchData = async () => {
+    const initializedData = async () => {
       try {
-        const response = await axios.get(
-          "http://172.20.10.12/exofutura/public/api/v1/zones"
-        );
-        setZoneData(response.data);
+        const zones = await fetchZones();
+        setZoneData(zones);
         setZoneLoading(false);
       } catch (error) {
         setZoneError("Error al obtener los datos");
@@ -23,42 +31,40 @@ export default function HomeScreen() {
       }
     };
 
-    fetchData();
+    const fetchUserLocation = async () => {
+      try {
+        const location = await fetchLocation();
+        setLocation(location);
+      } catch (error) {
+        setLocationError(error.message);
+      }
+    };
+
+    fetchUserLocation();
+    initializedData();
   }, []);
-
-  //#region CREATE MARKERS
-  const createMarkers = () => {
-    if (!zoneData) return null;
-
-    return zoneData.map((zone, index) => (
-      <Marker
-        key={index} 
-        coordinate={{
-          latitude: zone.latitude, 
-          longitude: zone.longitude, 
-        }}
-        title={zone.name} 
-        description={zone.description} 
-      />
-    ));
-  };
-  //#endregion CREATE MARKERS
+  // #endregion FETCHING
 
   // #region LOADING AND ERROR HANDLING
+  let text = "Waiting...";
+
   if (zoneLoading) {
     return (
       <View style={styles.container}>
-        <Text>Cargando los datos...</Text>
+        <Text>{text}</Text>
       </View>
     );
   }
 
-  if (zoneError) {
+  if (locationError) {
+    text = locationError;
     return (
       <View style={styles.container}>
-        <Text>{zoneError}</Text>
+        <Text>{text}</Text>
       </View>
     );
+  } else if (location) {
+    text = JSON.stringify(location);
   }
   // #endregion
 
@@ -66,32 +72,13 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.container}>
-        <MapView
-          initialRegion={{
-            latitude: 41.6477295, // Adjust initial region as needed
-            longitude: -0.8770484,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-          }}
-          style={styles.map}
-        >
-          {createMarkers()}
-        </MapView>
+        {location ? (
+          <MapComponent location={location} zoneData={zoneData} />
+        ) : (
+          <Text>Cargando mapa...</Text>
+        )}
       </View>
     </View>
   );
   // #endregion
 }
-
-
-// #region STYLES
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    width: "100%",
-    height: "100%",
-  },
-});
-// #endregion
