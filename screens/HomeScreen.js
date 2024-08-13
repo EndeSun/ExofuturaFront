@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Alert } from "react-native";
 import { View, Text } from "react-native";
 import { fetchZones } from "./services/zones";
 import { fetchLocation } from "./services/location";
@@ -18,9 +19,9 @@ TaskManager.defineTask(
       return;
     }
     if (eventType === GeofencingEventType.Enter) {
-      console.log("You've entered region:", region);
+      Alert.alert("Geofencing Alert", `You've entered region: ${region.identifier}`);
     } else if (eventType === GeofencingEventType.Exit) {
-      console.log("You've left region:", region);
+      Alert.alert("Geofencing Alert", `You've left region: ${region.identifier}`);
     }
   }
 );
