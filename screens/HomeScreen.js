@@ -25,29 +25,16 @@ TaskManager.defineTask(
   }
 );
 
-const regions = [
-  {
-    identifier: "Region1",
-    latitude: 41.65,
-    longitude: -0.90,
-    radius: 100,
-  },
-  {
-    identifier: "Region2",
-    latitude: 38.35,
-    longitude: -0.49,
-    radius: 100,
-  },
-];
-
-const startGeofencing = async () => {
-  const { status: foregroundStatus } = await Location.requestForegroundPermissionsAsync();
+const startGeofencing = async (regions) => {
+  const { status: foregroundStatus } =
+    await Location.requestForegroundPermissionsAsync();
   if (foregroundStatus !== "granted") {
     console.error("Permission to access location was denied");
     return;
   }
 
-  const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+  const { status: backgroundStatus } =
+    await Location.requestBackgroundPermissionsAsync();
   if (backgroundStatus !== "granted") {
     console.error("Permission to access location in the background was denied");
     return;
@@ -79,9 +66,19 @@ export default function HomeScreen() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [zones, location] = await Promise.all([fetchZones(), fetchLocation()]);
+        const [zones, location] = await Promise.all([
+          fetchZones(),
+          fetchLocation(),
+        ]);
+        const formattedZones = zones.map((zone) => ({
+          identifier: String(zone.id),  // Use id as identifier
+          latitude: parseFloat(zone.latitude),
+          longitude: parseFloat(zone.longitude),
+          radius: parseFloat(zone.radius), // Convert radius to meters if necessary
+        }));
         setZoneData(zones);
         setLocation(location);
+        await startGeofencing(formattedZones);
       } catch (error) {
         setError("Error al obtener los datos");
       } finally {
@@ -90,8 +87,7 @@ export default function HomeScreen() {
     };
 
     fetchData();
-
-    startGeofencing();
+    // startGeofencing();
   }, []);
   // #endregion FETCHING
 
