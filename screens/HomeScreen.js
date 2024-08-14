@@ -85,6 +85,7 @@ export default function HomeScreen() {
         }));
         setZoneData(zones);
         setLocation(location);
+        await startGeofencing(formattedZones);
 
         // POSITION CHANGES
         const locationSubscription = await Location.watchPositionAsync(
@@ -111,7 +112,6 @@ export default function HomeScreen() {
     };
 
     fetchData();
-    // startGeofencing();
   }, []);
   // #endregion FETCHING
 
