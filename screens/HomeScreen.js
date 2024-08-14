@@ -85,7 +85,6 @@ export default function HomeScreen() {
         }));
         setZoneData(zones);
         setLocation(location);
-        await startGeofencing(formattedZones);
 
         // POSITION CHANGES
         const locationSubscription = await Location.watchPositionAsync(
