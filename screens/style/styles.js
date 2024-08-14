@@ -8,6 +8,11 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  fab: {
+    position: "absolute",
+    right: 16,
+    bottom: 16,
+  },
 });
 
 export default styles; // Exportación por defecto
