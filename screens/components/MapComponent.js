@@ -20,7 +20,7 @@ export default function MapComponent({ location, zoneData }) {
           latitudeDelta: latitudeDelta,
           longitudeDelta: longitudeDelta,
         },
-        1000 // Animation duration in milliseconds
+        1000
       );
     }
   };

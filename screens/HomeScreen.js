@@ -19,9 +19,15 @@ TaskManager.defineTask(
       return;
     }
     if (eventType === GeofencingEventType.Enter) {
-      Alert.alert("Geofencing Alert", `You've entered region: ${region.identifier}`);
+      Alert.alert(
+        "Geofencing Alert",
+        `You've entered region: ${region.identifier}`
+      );
     } else if (eventType === GeofencingEventType.Exit) {
-      Alert.alert("Geofencing Alert", `You've left region: ${region.identifier}`);
+      Alert.alert(
+        "Geofencing Alert",
+        `You've left region: ${region.identifier}`
+      );
     }
   }
 );
@@ -72,7 +78,7 @@ export default function HomeScreen() {
           fetchLocation(),
         ]);
         const formattedZones = zones.map((zone) => ({
-          identifier: String(zone.id),  // Use id as identifier
+          identifier: String(zone.id), // Use id as identifier
           latitude: parseFloat(zone.latitude),
           longitude: parseFloat(zone.longitude),
           radius: parseFloat(zone.radius), // Convert radius to meters if necessary
@@ -80,6 +86,24 @@ export default function HomeScreen() {
         setZoneData(zones);
         setLocation(location);
         await startGeofencing(formattedZones);
+
+        // POSITION CHANGES
+        const locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5000,
+            distanceInterval: 50, 
+          },
+          (newLocation) => {
+            setLocation(newLocation);
+          }
+        );
+
+        // Clean up the subscription on unmount
+        return () => {
+          locationSubscription.remove();
+        };
+
       } catch (error) {
         setError("Error al obtener los datos");
       } finally {
