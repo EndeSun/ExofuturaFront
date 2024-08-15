@@ -1,27 +1,73 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import axios from "axios";
+import { View, Text } from "react-native";
+import { fetchZones } from "./services/zones";
+import { fetchLocation } from "./services/location";
+import MapComponent from "./components/MapComponent";
+import styles from "./style/styles";
+import * as Location from "expo-location";
+import ErrorMessage from './components/ErrorMessage';
+import {startGeofencing} from './services/geofencingService';
 
 export default function HomeScreen() {
-  const [data, setData] = useState(null);
+  // #region STATES
+  const [zoneData, setZoneData] = useState(null);
+  const [location, setLocation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // #endregion STATES
 
+  // #region FETCHING
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://cima.aemps.es/cima/rest/medicamento?nregistro=51347");
-        console.log(response);
-        setData(response.data);
-        setLoading(false);
+        const [zones, location] = await Promise.all([
+          fetchZones(),
+          fetchLocation(),
+        ]);
+        const formattedZones = zones.map((zone) => ({
+          identifier: String(zone.id), // Use id as identifier
+          latitude: parseFloat(zone.latitude),
+          longitude: parseFloat(zone.longitude),
+          radius: parseFloat(zone.radius), // Convert radius to meters if necessary
+        }));
+        setZoneData(zones);
+        setLocation(location);
+
+        // #region GEOFENCING
+        await startGeofencing(formattedZones);
+        // #endregion GEOFENCING
+
+        // POSITION CHANGES
+        const locationSubscription = await Location.watchPositionAsync(
+          {
+            accuracy: Location.Accuracy.High,
+            timeInterval: 5000,
+            distanceInterval: 50,
+          },
+          (newLocation) => {
+            setLocation(newLocation);
+          }
+        );
+
+        // Clean up the subscription on unmount
+        return () => {
+          locationSubscription.remove();
+        };
       } catch (error) {
         setError("Error al obtener los datos");
+      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
   }, []);
+  // #endregion FETCHING
+
+  // #region LOADING AND ERROR HANDLING
+  if (error) {
+    return <ErrorMessage message={error} />;
+  }
 
   if (loading) {
     return (
@@ -30,29 +76,17 @@ export default function HomeScreen() {
       </View>
     );
   }
+  // #endregion LOADING AND ERROR HANDLING
 
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text>{error}</Text>
-      </View>
-    );
-  }
-
+  // #region RENDER MAP
   return (
     <View style={styles.container}>
-      <Text>Nombre del Medicamento: {data.nombre}</Text>
-      <Text>Principio Activo: {data.pactivos}</Text>
-      {/* Agrega más campos según la estructura de los datos que recibes */}
+      {location && zoneData ? (
+        <MapComponent location={location} zoneData={zoneData} />
+      ) : (
+        <Text>Cargando mapa...</Text>
+      )}
     </View>
   );
+  // #endregion RENDER MAP
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
