@@ -1,65 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Alert } from "react-native";
 import { View, Text } from "react-native";
 import { fetchZones } from "./services/zones";
 import { fetchLocation } from "./services/location";
 import MapComponent from "./components/MapComponent";
 import styles from "./style/styles";
-import { GeofencingEventType } from "expo-location";
 import * as Location from "expo-location";
-import * as TaskManager from "expo-task-manager";
-
-const GEOFENCING_TASK = "GEOFENCING_TASK";
-
-TaskManager.defineTask(
-  GEOFENCING_TASK,
-  ({ data: { eventType, region }, error }) => {
-    if (error) {
-      console.error(error.message);
-      return;
-    }
-    if (eventType === GeofencingEventType.Enter) {
-      Alert.alert(
-        "Geofencing Alert",
-        `You've entered region: ${region.identifier}`
-      );
-    } else if (eventType === GeofencingEventType.Exit) {
-      Alert.alert(
-        "Geofencing Alert",
-        `You've left region: ${region.identifier}`
-      );
-    }
-  }
-);
-
-const startGeofencing = async (regions) => {
-  const { status: foregroundStatus } =
-    await Location.requestForegroundPermissionsAsync();
-  if (foregroundStatus !== "granted") {
-    console.error("Permission to access location was denied");
-    return;
-  }
-
-  const { status: backgroundStatus } =
-    await Location.requestBackgroundPermissionsAsync();
-  if (backgroundStatus !== "granted") {
-    console.error("Permission to access location in the background was denied");
-    return;
-  }
-
-  try {
-    await Location.startGeofencingAsync(GEOFENCING_TASK, regions);
-    console.log("Geofencing started");
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-const ErrorMessage = ({ message }) => (
-  <View style={styles.container}>
-    <Text style={styles.errorText}>{message}</Text>
-  </View>
-);
+import ErrorMessage from './components/ErrorMessage';
+import {startGeofencing} from './services/geofencingService';
 
 export default function HomeScreen() {
   // #region STATES
@@ -85,14 +32,17 @@ export default function HomeScreen() {
         }));
         setZoneData(zones);
         setLocation(location);
+
+        // #region GEOFENCING
         await startGeofencing(formattedZones);
+        // #endregion GEOFENCING
 
         // POSITION CHANGES
         const locationSubscription = await Location.watchPositionAsync(
           {
             accuracy: Location.Accuracy.High,
             timeInterval: 5000,
-            distanceInterval: 50, 
+            distanceInterval: 50,
           },
           (newLocation) => {
             setLocation(newLocation);
@@ -103,7 +53,6 @@ export default function HomeScreen() {
         return () => {
           locationSubscription.remove();
         };
-
       } catch (error) {
         setError("Error al obtener los datos");
       } finally {
