@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/HomeScreen";
 import OffersScreen from "./screens/OffersScreen";
 import Icon from "react-native-vector-icons/Ionicons"; // Asegúrate de usar el icono correcto de Ionicons
+import SettingsScreen from "./screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -17,6 +18,8 @@ function MyTabs() {
             iconName = "map"; // Asegúrate de usar el nombre correcto del icono de Ionicons
           } else if (route.name === "Offers") {
             iconName = "pricetag"; // Asegúrate de usar el nombre correcto del icono de Ionicons
+          } else if (route.name === "Settings") {
+            iconName = "settings"; // Asegúrate de usar el nombre correcto del icono de Ionicons
           }
           // Asegúrate de que el icono se renderiza correctamente
           return <Icon name={iconName} size={size} color={color} />;
@@ -25,6 +28,7 @@ function MyTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Offers" component={OffersScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
 }
