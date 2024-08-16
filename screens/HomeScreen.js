@@ -18,11 +18,12 @@ export default function HomeScreen() {
 
   // #region FETCHING
   var idUser = 3;
+  
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [zones, location] = await Promise.all([
-          fetchZones(idUser),
+          fetchZones(),
           fetchLocation(),
         ]);
         const formattedZones = zones.map((zone) => ({
