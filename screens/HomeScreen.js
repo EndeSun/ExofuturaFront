@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import { fetchZones } from "./services/zones";
 import { fetchLocation } from "./services/location";
+import { fetchUnlockedZones } from "./services/fetchUnlockedZones";
+
 import MapComponent from "./components/MapComponent";
 import styles from "./style/styles";
 import * as Location from "expo-location";
@@ -17,14 +19,15 @@ export default function HomeScreen() {
   // #endregion STATES
 
   // #region FETCHING
-  var idUser = 3;
-  
+  var idUser = 3; // Hardcoded for now, should be dynamic
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [zones, location] = await Promise.all([
+        const [zones, location, unlockedZones] = await Promise.all([
           fetchZones(),
           fetchLocation(),
+          fetchUnlockedZones(idUser),
         ]);
         const formattedZones = zones.map((zone) => ({
           identifier: String(zone.id), // Use id as identifier
@@ -32,7 +35,8 @@ export default function HomeScreen() {
           longitude: parseFloat(zone.longitude),
           radius: parseFloat(zone.radius), // Convert radius to meters if necessary
         }));
-        setZoneData(zones);
+
+        setZoneData(unlockedZones);
         setLocation(location);
 
         // #region GEOFENCING
