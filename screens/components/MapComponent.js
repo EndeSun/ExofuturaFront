@@ -6,10 +6,13 @@ import MarkersComponent from "./MarkersComponent";
 import styles from "../style/styles";
 
 export default function MapComponent({ location, zoneData }) {
+
+  // #region CONSTANTS
   const mapRef = useRef(null);
-  
   const latitudeDelta = 0.02;
   const longitudeDelta = 0.02;
+  // #endregion CONSTANTS
+
 
   const centerMap = () => {
     if (mapRef.current && location) {
