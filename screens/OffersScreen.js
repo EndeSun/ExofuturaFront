@@ -1,53 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { Platform, Text, View, StyleSheet } from 'react-native';
-import * as Location from 'expo-location';
+import React, { useState } from 'react';
+import { View, Button, StyleSheet } from 'react-native';
+import { putDiscoverZone } from './services/putDiscoverZone';
 
-export default function App() {
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
+const Offer = () => {
+  const [idZone] = useState(3);
+  const [idUser] = useState(1);
+  const [unlock] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS === 'android' && !Device.isDevice) {
-        setErrorMsg(
-          'Oops, this will not work on Snack in an Android Emulator. Try it on your device!'
-        );
-        return;
-      }
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permission to access location was denied');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
-  }, []);
-
-  let text = 'Waiting..';
-  if (errorMsg) {
-    text = errorMsg;
-  } else if (location) {
-    text = JSON.stringify(location);
-  }
+  const handleButtonClick = async () => {
+    try {
+      const result = await putDiscoverZone(idZone, idUser, unlock);
+      console.log('Discover zone result:', result);
+    } catch (error) {
+      console.error('Error discovering zone:', error);
+    }
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.paragraph}>{text}</Text>
+      <Button title="Discover Zone" onPress={handleButtonClick} />
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
-  },
-  paragraph: {
-    fontSize: 18,
-    textAlign: 'center',
+    alignItems: 'center',
   },
 });
+
+export default Offer;

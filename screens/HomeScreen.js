@@ -3,6 +3,7 @@ import { View, Text } from "react-native";
 import { fetchZones } from "./services/zones";
 import { fetchLocation } from "./services/location";
 import { fetchUnlockedZones } from "./services/fetchUnlockedZones";
+import putDiscoverZone from './services/putDiscoverZone';
 
 import MapComponent from "./components/MapComponent";
 import styles from "./style/styles";
@@ -29,6 +30,12 @@ export default function HomeScreen() {
           fetchLocation(),
           fetchUnlockedZones(idUser),
         ]);
+
+        console.log(zones);
+        console.log(location);
+        console.log(unlockedZones);
+
+        
         const formattedZones = zones.map((zone) => ({
           identifier: String(zone.id), // Use id as identifier
           latitude: parseFloat(zone.latitude),
