@@ -1,12 +1,15 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./screens/HomeScreen";
 import OffersScreen from "./screens/OffersScreen";
+import DetailScreen from "./screens/DetailScreen"; // Nueva pantalla
 import Icon from "react-native-vector-icons/Ionicons"; // Asegúrate de usar el icono correcto de Ionicons
 import SettingsScreen from "./screens/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 function MyTabs() {
   return (
@@ -36,7 +39,14 @@ function MyTabs() {
 export default function Navigation() {
   return (
     <NavigationContainer>
-      <MyTabs />
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Main"
+          component={MyTabs}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Detail" component={DetailScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
