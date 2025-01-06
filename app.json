@@ -15,21 +15,44 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "locationAlwaysPermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true,
+          "isAndroidForegroundServiceEnabled": true
         }
       ]
     ],
     "ios": {
-      "supportsTablet": true
+      "infoPlist": {
+          "NSLocationAlwaysUsageDescription": "We need access to your location to provide background location updates.",
+          "NSLocationWhenInUseUsageDescription": "We need access to your location to show your current position on the map.",
+          "NSLocationAlwaysAndWhenInUseUsageDescription": "We need access to your location to show your current position on the map even when the app is in the background."
+      },
+      "bundleIdentifier": "com.ende1195.ExofuturaFront"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
+      ],
+      "package": "com.ende1195.ExofuturaFront"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "5f4fecd8-093e-474f-a356-1e1715961cd6"
+      }
     }
   }
 }

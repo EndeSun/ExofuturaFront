@@ -31,9 +31,9 @@ export default function HomeScreen() {
           fetchUnlockedZones(idUser),
         ]);
 
-        console.log(zones);
-        console.log(location);
-        console.log(unlockedZones);
+        // console.log(zones);
+        // console.log("localización", location);
+        // console.log(unlockedZones);
 
         
         const formattedZones = zones.map((zone) => ({
@@ -42,6 +42,8 @@ export default function HomeScreen() {
           longitude: parseFloat(zone.longitude),
           radius: parseFloat(zone.radius), // Convert radius to meters if necessary
         }));
+
+        console.log("Zonas formateadas", formattedZones);
 
         setZoneData(unlockedZones);
         setLocation(location);
@@ -78,17 +80,17 @@ export default function HomeScreen() {
   // #endregion FETCHING
 
   // #region LOADING AND ERROR HANDLING
-  if (error) {
-    return <ErrorMessage message={error} />;
-  }
+  // if (error) {
+  //   return <ErrorMessage message={error} />;
+  // }
 
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text>Cargando...</Text>
-      </View>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text>Cargando...</Text>
+  //     </View>
+  //   );
+  // }
   // #endregion LOADING AND ERROR HANDLING
 
   // #region RENDER MAP

@@ -52,22 +52,23 @@ TaskManager.defineTask(
 );
 
 export const startGeofencing = async (regions) => {
-  // FOREGROUND PERMISSIONS
+  console.log("Zonas recibidas", regions);
+
+  // Solicitud de permisos en primer plano
   const { status: foregroundStatus } =
     await Location.requestForegroundPermissionsAsync();
-
   if (foregroundStatus !== "granted") {
-    console.error("Permission to access location was denied");
+    console.error("Foreground location permission was denied");
     return;
   }
+  console.log("Foreground permissions granted");
 
-  // BACKGROUND PERMISSIONS
-  const { status: backgroundStatus } =
-    await Location.requestBackgroundPermissionsAsync();
-
-  if (backgroundStatus !== "granted") {
-    console.error("Permission to access location in the background was denied");
-    return;
+  // Solicitud de permisos en segundo plano
+  try {
+    const { status: backgroundStatus } = await Location.requestBackgroundPermissionsAsync();
+    console.log("Background permission status:", backgroundStatus);
+  } catch (error) {
+    console.error("Error requesting background location permission:", error);
   }
 
   try {
@@ -75,6 +76,6 @@ export const startGeofencing = async (regions) => {
     await Location.startGeofencingAsync(GEOFENCING_TASK, regions);
     console.log("Geofencing started");
   } catch (error) {
-    console.error(error);
+    console.error("Error starting geofencing:", error);
   }
 };
